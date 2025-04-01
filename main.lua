@@ -139,7 +139,7 @@ SMODS.Back{
         name = 'Polychrome Deck',
         text = {
             "Add {C:dark_edition}Polychrome{} to {C:attention}#1#{}",
-            "random cards in deck",
+            "random card in deck",
         }
     },
     atlas = 'Decks',
