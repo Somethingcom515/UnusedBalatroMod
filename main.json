@@ -1,0 +1,14 @@
+{
+	"id": "UnusedBalatroMod",
+	"name": "Unused Balatro Mod",
+	"author": ["Somethingcom515"],
+	"description": "Puts unused things back into the game",
+	"prefix": "ubm",
+	"main_file": "main.lua",
+	"priority": 199,
+	"badge_colour": "E8463D",
+	"badge_text_colour": "FFFFFF",
+	"display_name": "Unused Balatro Mod",
+	"version": "1.0.0",
+	"dependencies": []
+}
