@@ -12,6 +12,13 @@ SMODS.Atlas{
     py = 95,
 }
 
+SMODS.Atlas{
+    key = 'Jokers',
+    path = 'Jokers.png',
+    px = 71,
+    py = 95,
+}
+
 SMODS.Back{
     key = 'braided',
     loc_txt = {
@@ -259,6 +266,7 @@ SMODS.Voucher{
     discovered = true,
     atlas = 'Vouchers',
     pos = { x = 1, y = 0 },
+    requires = {'v_ubm_magnet'}
 }
 
 SMODS.Voucher{
@@ -308,7 +316,7 @@ SMODS.Voucher{
     },
     unlocked = true,
     discovered = true,
-    atlas = 'Vouchers', --- paper shiller dont sue me
+    atlas = 'Vouchers',
     requires = {'v_ubm_pattern'},
     pos = { x = 3, y = 0 },
     redeem = function(self, card)
@@ -377,12 +385,63 @@ SMODS.Voucher{
     end
 }
 
+local function reset_chaostheory()
+    local visiblehands = {}
+    G.GAME.current_round.chaostheoryxmult = ((pseudorandom('chaostheory') * (G.P_CENTERS.j_ubm_chaostheory.config.max - G.P_CENTERS.j_ubm_chaostheory.config.min)) + G.P_CENTERS.j_ubm_chaostheory.config.min)
+    for k, v in pairs(G.GAME.hands) do
+        if v.visible and k ~= 'High Card' then
+            table.insert(visiblehands, k)
+        end
+    end
+    G.GAME.current_round.chaostheoryhand = pseudorandom_element(visiblehands, pseudoseed('chaostheory'))
+end
+
+SMODS.Joker{
+    name = 'ChaosTheory',
+    key = 'chaostheory',
+    loc_txt = {
+        name = 'Chaos Theory',
+        text = {
+            'Gives {X:mult,C:white}X#1#{} Mult if {C:attention}poker hand{}',
+            'is a {C:attention}#2#{}',
+            '{C:inactive}(Poker hand and Xmult change at end of round){}',
+        }
+    },
+    config = {
+        min = 1.1,
+        max = 5.3,
+    },
+    unlocked = true,
+    discovered = true,
+    atlas = 'Jokers',
+    pos = { x = 0, y = 0 },
+    rarity = 3,
+    loc_vars = function(self, info_queue, card)
+        return {vars = {(G.GAME.current_round.chaostheoryxmult or 1), (G.GAME.current_round.chaostheoryhand or 'Flush')}}
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and context.cardarea == G.jokers and context.scoring_name == G.GAME.current_round.chaostheoryhand then
+            return {
+                xmult = G.GAME.current_round.chaostheoryxmult
+            }
+        end
+        if context.end_of_round and context.cardarea == G.jokers then
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = "Chaos!", colour = G.C.DARK_EDITION})
+            reset_chaostheory()
+        end
+    end
+}
+
 local oldstartrun = Game.start_run
 function Game:start_run(args)
     local g = oldstartrun(self, args)
+    local saveTable = args.savetext or nil
     if G.PROFILES[G.SETTINGS.profile].silverspoon_money then
         G.GAME.dollars = G.GAME.dollars + G.PROFILES[G.SETTINGS.profile].silverspoon_money
         G.PROFILES[G.SETTINGS.profile].silverspoon_money = nil
+    end
+    if not saveTable then
+        reset_chaostheory()
     end
     return g
 end
